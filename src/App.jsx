@@ -4,17 +4,14 @@ import Entrada from './pages/Entrada'
 import NaoEncontrada from './pages/NaoEncontrada'
 import PaginaEmConstrucao from './pages/PaginaEmConstrucao'
 import { rotas } from './rotas'
-import { lazy, Suspense } from 'react'
-import Estado from './components/Estado'
-
-const Componentes = import.meta.env.DEV ? lazy(() => import('./pages/Componentes')) : null
+import Componentes from './pages/Componentes'
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Entrada />} />
-        {import.meta.env.DEV && <Route path="/dev/componentes" element={<Suspense fallback={<Estado tipo="carregando" />}><Componentes /></Suspense>} />}
+        {import.meta.env.DEV && <Route path="/dev/componentes" element={<Componentes />} />}
         {rotas.filter((rota) => rota.caminho !== '/').map((rota) => (
           <Route
             key={rota.caminho}

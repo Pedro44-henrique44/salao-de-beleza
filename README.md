@@ -4,8 +4,8 @@ Aplicativo web da disciplina POS 2026, desenvolvido em React e JavaScript com Vi
 O objetivo é permitir agendamentos de cabelo, manicure e maquiagem e a administração
 dos profissionais, serviços, horários e agenda do salão.
 
-**Estado atual:** itens 01 e 02 da árvore de progresso, com estrutura de pastas,
-rotas provisórias, configuração da API, identidade visual e componentes comuns.
+**Estado atual:** itens 01 a 03 da árvore de progresso, com estrutura de pastas,
+rotas provisórias, identidade visual, componentes comuns e cliente HTTP com erros padronizados.
 Login, cadastros e agendamentos ainda não estão implementados.
 
 ## Executar localmente
@@ -36,7 +36,7 @@ O build é gerado em `dist/`. A configuração de rotas do Vercel está em
 
 ## Organização do código
 
-- `src/api/`: configuração e futura comunicação com a API.
+- `src/api/`: configuração, cliente HTTP e tratamento dos erros da API.
 - `src/components/`: componentes compartilhados, como o layout.
 - `src/hooks/`: hooks compartilhados, conforme forem necessários.
 - `src/pages/`: páginas; `admin/` para administração e `agendar/` para o agendamento.
@@ -48,6 +48,7 @@ Os arquivos `.gitkeep` mantêm as pastas vazias no Git e podem ser removidos qua
 elas receberem código. As rotas atuais exibem páginas provisórias, sem dados ou
 autenticação. Ao implementar uma tela, substituir sua rota provisória em `App.jsx`
 pelo componente real. Coordenar alterações nos arquivos compartilhados com o colega.
+Ao usar `Campo`, informar um `id` único na página para associar o rótulo ao input.
 
 ## Documentação
 
@@ -58,5 +59,34 @@ pelo componente real. Coordenar alterações nos arquivos compartilhados com o c
 
 A entrega da disciplina está prevista para **16/10/2026**, com demonstração no
 Vercel. Todos os integrantes devem contribuir com commits. As próximas issues
-introduzem cliente HTTP (03) e acesso/sessão (04–08). Esses números correspondem
+introduzem acesso/sessão (04–08). Esses números correspondem
 aos itens da árvore de progresso, não aos números automáticos do GitHub.
+
+## Comunicação com a API
+
+Importar `api` de `src/api/client.js`. O cliente usa a `VITE_API_URL` já configurada
+e aceita endpoints com barra final, como `/servicos/`. Filtros vão na URL.
+
+```js
+const pagina = await api('/servicos/?ativo=true&page=1', { token: access })
+const proxima = pagina.next ? await api(pagina.next, { token: access }) : null
+const dados = new FormData()
+dados.append('nome', nome)
+dados.append('foto', arquivo)
+await api('/auth/eu/', { method: 'PATCH', body: dados, token: access })
+```
+
+`body` aceita um objeto JSON ou `FormData` (sem definir `Content-Type` manualmente).
+Para montar filtros com valores variáveis, pode-se usar `URLSearchParams`.
+Respostas vazias retornam `null`, e as listas preservam a paginação da API.
+Links absolutos, como `next`, só são aceitos dentro da API configurada.
+
+Falhas lançam um `Error`: `message` serve para o componente `Estado`, `campos.email`
+(e os demais campos) para `Campo`, `status` para decisões da tela e `dados` preserva
+o JSON original. Erros gerais de validação vêm de `detail`, `non_field_errors` ou
+listas. Há mensagens para 400, 401, 403, 404, 429, falhas do servidor e de conexão
+(`status: 0` em falhas de conexão).
+
+O token é opcional e fornecido por requisição. Login, armazenamento e renovação
+automática ainda serão integrados nos itens 04–05; por enquanto, 401 é propagado.
+O retorno à lista em 404 será responsabilidade de cada página.

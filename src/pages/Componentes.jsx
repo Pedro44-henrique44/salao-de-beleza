@@ -32,9 +32,9 @@ export default function Componentes() {
       <Cartao>
         <h2>Campos de formulário</h2>
         <div className="grade-componentes">
-          <Campo label="Nome" value={nome} onChange={(event) => setNome(event.target.value)} autoComplete="name" ajuda="Use seu nome completo." required />
-          <Campo label="E-mail" type="email" defaultValue="exemplo" erro="Informe um e-mail válido." />
-          <Campo label="Campo desabilitado" value="Não editável" disabled />
+          <Campo id="exemplo-nome" label="Nome" value={nome} onChange={(event) => setNome(event.target.value)} autoComplete="name" ajuda="Use seu nome completo." required />
+          <Campo id="exemplo-email" label="E-mail" type="email" defaultValue="exemplo" erro="Informe um e-mail válido." />
+          <Campo id="exemplo-desabilitado" label="Campo desabilitado" value="Não editável" disabled />
         </div>
       </Cartao>
       <Cartao>
