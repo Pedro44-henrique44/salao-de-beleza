@@ -4,8 +4,9 @@ Aplicativo web da disciplina POS 2026, desenvolvido em React e JavaScript com Vi
 O objetivo é permitir agendamentos de cabelo, manicure e maquiagem e a administração
 dos profissionais, serviços, horários e agenda do salão.
 
-**Estado atual:** fundação da issue 01, com estrutura de pastas, rotas provisórias e
-configuração da API. Login, cadastros e agendamentos ainda não estão implementados.
+**Estado atual:** itens 01 e 02 da árvore de progresso, com estrutura de pastas,
+rotas provisórias, configuração da API, identidade visual e componentes comuns.
+Login, cadastros e agendamentos ainda não estão implementados.
 
 ## Executar localmente
 
@@ -57,4 +58,5 @@ pelo componente real. Coordenar alterações nos arquivos compartilhados com o c
 
 A entrega da disciplina está prevista para **16/10/2026**, com demonstração no
 Vercel. Todos os integrantes devem contribuir com commits. As próximas issues
-introduzem identidade visual (02), cliente HTTP (03) e acesso/sessão (04–08).
+introduzem cliente HTTP (03) e acesso/sessão (04–08). Esses números correspondem
+aos itens da árvore de progresso, não aos números automáticos do GitHub.

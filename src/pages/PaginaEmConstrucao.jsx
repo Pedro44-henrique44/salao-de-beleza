@@ -1,11 +1,12 @@
-import { Link } from 'react-router'
+import { LinkBotao } from '../components/Botao'
 
 export default function PaginaEmConstrucao({ titulo }) {
   return (
-    <section>
+    <section className="pagina-mensagem">
+      <p className="sobretitulo">Em breve</p>
       <h1>{titulo}</h1>
       <p>Esta página está em construção.</p>
-      <Link to="/">Voltar para a entrada</Link>
+      <LinkBotao to="/" variante="secundario">Voltar para a entrada</LinkBotao>
     </section>
   )
 }
