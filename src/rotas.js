@@ -1,4 +1,4 @@
-// Contrato de navegação da equipe. Os componentes reais substituirão os provisórios.
+// Mapa de navegação usado pelas rotas da aplicação e pelos atalhos de desenvolvimento.
 export const rotas = [
   { id: 'E1', caminho: '/', titulo: 'Entrada', area: 'Acesso e perfil' },
   { id: 'E2', caminho: '/cadastro', titulo: 'Criar conta', area: 'Acesso e perfil' },
