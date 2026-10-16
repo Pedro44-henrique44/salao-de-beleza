@@ -4,10 +4,10 @@ Aplicativo web da disciplina POS 2026, desenvolvido em React e JavaScript com Vi
 O objetivo é permitir agendamentos de cabelo, manicure e maquiagem e a administração
 dos profissionais, serviços, horários e agenda do salão.
 
-**Estado atual:** etapas 1 e 2 da árvore de progresso (itens 01 a 08), com fundação,
+**Estado atual:** etapas 1 a 3 da árvore de progresso (itens 01 a 12), com fundação,
 identidade visual, cliente HTTP, cadastro/login, sessão persistente, permissões,
-recuperação de senha e edição do perfil. Os cadastros administrativos e os
-agendamentos continuam com páginas provisórias.
+recuperação de senha, edição do perfil e cadastros administrativos. Agendamentos,
+acompanhamento e avaliações continuam com páginas provisórias.
 
 ## Executar localmente
 
@@ -63,7 +63,7 @@ Ao usar `Campo`, informar um `id` único na página para associar o rótulo ao i
 
 A entrega da disciplina está prevista para **16/10/2026**, com demonstração no
 Vercel. Todos os integrantes devem contribuir com commits. A próxima etapa é a
-preparação do salão pelo administrador (itens 09–12). Esses números correspondem
+implementação do agendamento pelo cliente (itens 13–16). Esses números correspondem
 aos itens da árvore de progresso, não aos números automáticos do GitHub.
 
 ## Comunicação com a API
@@ -101,6 +101,21 @@ const podeAgendar = pode('api.add_agendamento')
 ```
 
 O retorno à lista em 404 continua sendo responsabilidade de cada página.
+
+## Preparação do salão
+
+Em Negócio, o administrador edita nome, descrição e logo. Em Profissionais e
+Serviços, pode cadastrar, editar, enviar/remover imagens e desativar registros.
+As listas têm filtro por situação e paginação. Cada serviço permite selecionar
+as profissionais que o realizam, incluindo retirar todos os vínculos.
+
+Em Horários, é possível adicionar, editar e remover faixas de segunda a domingo,
+com confirmação antes da remoção. O fim deve ser posterior ao início.
+As ações respeitam as permissões `add`, `change` e `delete` de cada cadastro.
+
+Serviços salvam os campos em JSON e enviam a imagem em uma segunda requisição.
+Se apenas o upload falhar, a tela informa que os dados foram salvos e permite
+reenviar a imagem sem duplicar o cadastro.
 
 ## Acesso e sessão
 
