@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router'
-import { LinkBotao } from '../components/Botao'
+import Botao, { LinkBotao } from '../components/Botao'
 import Cartao from '../components/Cartao'
 import CartaoAvaliacao from '../components/Avaliacao'
 import Estado from '../components/Estado'
@@ -47,17 +47,17 @@ export function PerfilProfissional() {
   const { id } = useParams()
   const pessoa = useConsulta(`/recursos/${id}/`)
   const servicos = useListaPaginada('/servicos/?ativo=true')
-  const avaliacoes = useListaPaginada(`/avaliacoes/?recurso=${id}`)
+  const avaliacoes = useListaPaginada(`/avaliacoes/?recurso=${id}`, false)
 
-  if (pessoa.carregando || servicos.carregando || avaliacoes.carregando) {
+  if (pessoa.carregando) {
     return <Estado tipo="carregando" />
   }
 
-  const falha = pessoa.erro || servicos.erro || avaliacoes.erro
+  const falha = pessoa.erro
   if (falha) {
     return <Estado
       tipo="erro"
-      aoTentarNovamente={pessoa.erro ? pessoa.recarregar : servicos.erro ? servicos.recarregar : avaliacoes.recarregar}
+      aoTentarNovamente={pessoa.recarregar}
     >
       {falha.message}
     </Estado>
@@ -68,9 +68,6 @@ export function PerfilProfissional() {
     const recursos = servico.recursos || servico.profissionais || []
     return recursos.some((recurso) => String(recurso.id ?? recurso) === String(id))
   })
-  const media = avaliacoes.dados.length
-    ? avaliacoes.dados.reduce((total, avaliacao) => total + Number(avaliacao.nota || 0), 0) / avaliacoes.dados.length
-    : 0
 
   return (
     <section className="pilha">
@@ -82,11 +79,6 @@ export function PerfilProfissional() {
         <div>
           <h1>{profissional.nome}</h1>
           <p>{profissional.bio || 'Profissional do salão'}</p>
-          <p className="texto-suave">
-            {avaliacoes.dados.length
-              ? `${media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} de 5 · ${avaliacoes.dados.length} avaliação(ões)`
-              : 'Ainda sem avaliações'}
-          </p>
           <Link
             className="botao botao--primario"
             to="/agendar"
@@ -99,7 +91,9 @@ export function PerfilProfissional() {
 
       <section className="pilha">
         <h2>Serviços</h2>
-        {servicosDaProfissional.length ? (
+        {servicos.carregando ? <Estado tipo="carregando" /> : servicos.erro ? (
+          <Estado tipo="erro" aoTentarNovamente={servicos.recarregar}>{servicos.erro.message}</Estado>
+        ) : servicosDaProfissional.length ? (
           <ul className="lista-servicos">
             {servicosDaProfissional.map((servico) => (
               <li key={servico.id}>
@@ -118,7 +112,9 @@ export function PerfilProfissional() {
 
       <section className="pilha">
         <h2>Avaliações</h2>
-        {avaliacoes.dados.length ? (
+        {avaliacoes.carregando ? <Estado tipo="carregando" /> : avaliacoes.erro ? (
+          <Estado tipo="erro" aoTentarNovamente={avaliacoes.recarregar}>{avaliacoes.erro.message}</Estado>
+        ) : avaliacoes.dados.length ? (
           <div className="grade-componentes">
             {avaliacoes.dados.map((avaliacao) => (
               <CartaoAvaliacao key={avaliacao.id} avaliacao={avaliacao} />
@@ -127,6 +123,8 @@ export function PerfilProfissional() {
         ) : (
           <Estado titulo="Ainda sem avaliações" />
         )}
+        {avaliacoes.erroMais && <p role="alert">{avaliacoes.erroMais.message}</p>}
+        {!avaliacoes.carregando && avaliacoes.proxima && <Botao carregando={avaliacoes.carregandoMais} onClick={avaliacoes.carregarMais}>Carregar mais</Botao>}
       </section>
     </section>
   )

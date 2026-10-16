@@ -1,41 +1,59 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../AuthContext'
 
-export default function useListaPaginada(caminho) {
+// Cadastros precisam da lista completa; avaliações carregam uma página por vez.
+export default function useListaPaginada(caminho, todas = true) {
   const { api } = useAuth()
   const [resultado, setResultado] = useState({ caminho: '', dados: [], erro: null })
   const [tentativa, setTentativa] = useState(0)
+  const consultaAtual = useRef(0)
 
   useEffect(() => {
-    let ativo = true
-
+    const consulta = ++consultaAtual.current
     async function carregar() {
       try {
-        const primeiraPagina = await api(caminho)
-        const resultados = Array.isArray(primeiraPagina)
-          ? [...primeiraPagina]
-          : [...(primeiraPagina?.results || [])]
-        let proxima = primeiraPagina?.next
-
-        while (proxima) {
+        const primeira = await api(caminho)
+        const dados = Array.isArray(primeira) ? [...primeira] : [...(primeira?.results || [])]
+        let proxima = primeira?.next
+        while (todas && proxima && consulta === consultaAtual.current) {
           const pagina = await api(proxima)
-          resultados.push(...(Array.isArray(pagina) ? pagina : pagina?.results || []))
+          dados.push(...(Array.isArray(pagina) ? pagina : pagina?.results || []))
           proxima = pagina?.next
         }
-
-        if (ativo) setResultado({ caminho, dados: resultados, erro: null })
+        if (consulta === consultaAtual.current) {
+          setResultado({ caminho, tentativa, dados, proxima, erro: null })
+        }
       } catch (erro) {
-        if (ativo) setResultado({ caminho, dados: [], erro })
+        if (consulta === consultaAtual.current) setResultado({ caminho, tentativa, dados: [], erro })
       }
     }
-
     carregar()
-    return () => { ativo = false }
-  }, [api, caminho, tentativa])
+    return () => { consultaAtual.current = consulta + 1 }
+  }, [api, caminho, tentativa, todas])
+
+  async function carregarMais() {
+    if (!resultado.proxima || resultado.carregandoMais) return
+    const consulta = consultaAtual.current
+    setResultado((atual) => ({ ...atual, carregandoMais: true, erroMais: null }))
+    try {
+      const pagina = await api(resultado.proxima)
+      if (consulta === consultaAtual.current) {
+        setResultado((atual) => ({ ...atual,
+          dados: [...atual.dados, ...(Array.isArray(pagina) ? pagina : pagina?.results || [])],
+          proxima: pagina?.next, carregandoMais: false,
+        }))
+      }
+    } catch (erroMais) {
+      if (consulta === consultaAtual.current) {
+        setResultado((atual) => ({ ...atual, erroMais, carregandoMais: false }))
+      }
+    }
+  }
 
   return {
     ...resultado,
-    carregando: resultado.caminho !== caminho,
+    carregando: resultado.caminho !== caminho || resultado.tentativa !== tentativa,
+    carregarMais,
     recarregar: () => setTentativa((valor) => valor + 1),
   }
 }

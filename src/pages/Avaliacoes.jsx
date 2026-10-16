@@ -59,8 +59,8 @@ export function AvaliarAtendimento() {
       <p className="sobretitulo">Sua opinião</p>
       <h1>Avalie seu atendimento</h1>
       <Cartao>
-        <p><strong>{dados.servico?.nome || 'Atendimento'}</strong></p>
-        <p className="texto-suave">Com {dados.recurso?.nome || dados.profissional?.nome || 'nossa profissional'}</p>
+        <p><strong>{dados.servico_nome || dados.servico?.nome || 'Atendimento'}</strong></p>
+        <p className="texto-suave">Com {dados.recurso_nome || dados.recurso?.nome || dados.profissional?.nome || 'nossa profissional'}</p>
 
         <form className="pilha" onSubmit={enviarAvaliacao} aria-busy={enviando}>
           <fieldset className="campo campo-nota" disabled={enviando}>
@@ -116,7 +116,7 @@ export function ListaAvaliacoesAdministrador() {
   const [nota, setNota] = useState('')
   const profissionais = useListaPaginada('/recursos/')
   const consulta = useListaPaginada(
-    `/avaliacoes/?${recurso ? `recurso=${recurso}&` : ''}${nota ? `nota=${nota}` : ''}`,
+    `/avaliacoes/?${recurso ? `recurso=${recurso}&` : ''}${nota ? `nota=${nota}` : ''}`, false,
   )
 
   if (profissionais.carregando || consulta.carregando) return <Estado tipo="carregando" />
@@ -170,6 +170,8 @@ export function ListaAvaliacoesAdministrador() {
       ) : (
         <Estado titulo="Nenhuma avaliação encontrada" />
       )}
+      {consulta.erroMais && <p role="alert">{consulta.erroMais.message}</p>}
+      {consulta.proxima && <Botao carregando={consulta.carregandoMais} onClick={consulta.carregarMais}>Carregar mais</Botao>}
     </section>
   )
 }

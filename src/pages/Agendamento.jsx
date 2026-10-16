@@ -5,6 +5,7 @@ import Cartao from '../components/Cartao'
 import Estado from '../components/Estado'
 import StatusAgendamento from '../components/StatusAgendamento'
 import { useAuth } from '../AuthContext'
+import useListaPaginada from '../hooks/useListaPaginada'
 
 const CHAVE = 'agendamento-em-andamento'
 const dataHoje = () => new Date().toISOString().slice(0, 10)
@@ -35,7 +36,7 @@ export default function Agendamento() {
     const anterior = JSON.parse(sessionStorage.getItem(CHAVE) || '{}')
     const profissional = location.state?.profissional
     return profissional
-      ? { ...anterior, profissional, servico: null, horario: null }
+      ? { profissional }
       : anterior
   })
   const salvar = (dados) => { setSelecao(dados); sessionStorage.setItem(CHAVE, JSON.stringify(dados)) }
@@ -50,12 +51,14 @@ export default function Agendamento() {
 
 function Falha({ estado }) { return estado.erro ? <Estado tipo="erro" titulo="Não foi possível carregar" aoTentarNovamente={() => window.location.reload()}>{estado.erro.message}</Estado> : null }
 
-function EscolherServico({ api, navigate, selecao, salvar }) {
-  const estado = useDados(api, '/servicos/?ativo=true')
+function EscolherServico({ navigate, selecao, salvar }) {
+  const estado = useListaPaginada('/servicos/?ativo=true')
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Falha estado={estado} />
-  const servicos = lista(estado.dados)
-  return <section className="pagina-agendamento"><Cabecalho titulo="Escolha um serviço" etapa="1" />{selecao.profissional && <p className="mensagem">Agendando com {selecao.profissional.nome}</p>}{servicos.length ? <div className="grade-agendamento">{servicos.map((servico) => <Cartao className="cartao-servico" key={servico.id}><h2>{servico.nome}</h2><p className="texto-suave">{servico.descricao || 'Um cuidado pensado para você.'}</p><p><strong>{minutos(campo(servico, 'duracao', 'duracao_minutos'))}</strong> · <strong>{dinheiro(servico.preco)}</strong></p><Botao onClick={() => { salvar({ ...selecao, servico, horario: null }); navigate(selecao.profissional ? '/agendar/horario' : '/agendar/profissional') }}>Escolher</Botao></Cartao>)}</div> : <Estado titulo="Nenhum serviço disponível" />}</section>
+  const profissional = selecao.profissional
+  const servicos = lista(estado.dados).filter((servico) => !profissional ||
+    (servico.recursos || []).some((recurso) => String(recurso.id ?? recurso) === String(profissional.id)))
+  return <section className="pagina-agendamento"><Cabecalho titulo="Escolha um serviço" etapa="1" />{selecao.profissional && <p className="mensagem">Agendando com {selecao.profissional.nome}. <Botao variante="secundario" onClick={() => salvar({})}>Escolher outra profissional</Botao></p>}{servicos.length ? <div className="grade-agendamento">{servicos.map((servico) => <Cartao className="cartao-servico" key={servico.id}><h2>{servico.nome}</h2><p className="texto-suave">{servico.descricao || 'Um cuidado pensado para você.'}</p><p><strong>{minutos(servico.duracao_min)}</strong> · <strong>{dinheiro(servico.preco)}</strong></p><Botao onClick={() => { salvar({ profissional, servico }); navigate(selecao.profissional ? '/agendar/horario' : '/agendar/profissional') }}>Escolher</Botao></Cartao>)}</div> : <Estado titulo="Nenhum serviço disponível" />}</section>
 }
 
 function EscolherProfissional({ api, navigate, selecao, salvar }) {
