@@ -10,7 +10,7 @@ import ImagemFormulario from '../../components/ImagemFormulario'
 // Os três cadastros compartilham nome, texto, imagem e a mesma forma de salvar.
 export default function FormularioCadastro({ tipo }) {
   const { id } = useParams()
-  const { api, pode } = useAuth()
+  const { api, pode, salvarOrganizacao } = useAuth()
   const navigate = useNavigate()
   const negocio = tipo === 'negocio'
   const servico = tipo === 'servico'
@@ -100,7 +100,9 @@ export default function FormularioCadastro({ tipo }) {
         Object.entries(campos).forEach(([campo, valor]) => corpo.append(campo, valor))
         if (arquivo) corpo.append(imagem, arquivo)
         else if (remover) corpo.append(imagem, '')
-        atualizado = await api(caminho, { method, body: corpo })
+        atualizado = negocio
+          ? await salvarOrganizacao(corpo)
+          : await api(caminho, { method, body: corpo })
       }
       setDados(atualizado)
       setArquivo(null)

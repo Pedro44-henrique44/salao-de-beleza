@@ -1,10 +1,10 @@
 import { Link, NavLink, Outlet } from 'react-router'
-import { marca } from '../marca'
-import { useAuth } from '../AuthContext'
+import { marcaDoUsuario, useAuth } from '../AuthContext'
 import Botao from './Botao'
 
 export default function Layout() {
   const { usuario, carregando, inicio, pode, sair } = useAuth()
+  const marca = marcaDoUsuario(usuario)
   const administrador = pode('api.change_organizacao')
   const links = administrador ? [
     ['/admin/agenda', 'Agenda'], ['/admin/a-confirmar', 'A confirmar'],

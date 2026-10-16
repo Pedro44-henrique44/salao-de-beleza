@@ -67,9 +67,15 @@ export default function AuthProvider({ children }) {
     return atualizado
   }
 
+  async function salvarOrganizacao(dados) {
+    const organizacao = await sessao.api('/organizacao/', { method: 'PATCH', body: dados })
+    setUsuario((atual) => ({ ...atual, organizacao }))
+    return organizacao
+  }
+
   return (
     <AuthContext.Provider value={{
-      usuario, carregando, erro, aviso, entrar, sair, salvarPerfil,
+      usuario, carregando, erro, aviso, entrar, sair, salvarPerfil, salvarOrganizacao,
       api: sessao.api,
       inicio: inicioDoUsuario(usuario),
       pode: (permissao) => temPermissao(usuario, permissao),
