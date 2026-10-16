@@ -37,7 +37,7 @@ export default function Entrada() {
       {import.meta.env.DEV && (
         <details className="mapa-rotas">
           <summary>Mapa de desenvolvimento</summary>
-          <p>Páginas provisórias, sem dados ou autenticação. IDs abaixo são exemplos de navegação.</p>
+          <p>Acesso e perfil implementados; demais páginas provisórias. As rotas internas exigem login e as permissões correspondentes. IDs abaixo são exemplos de navegação.</p>
           <Link to="/dev/componentes">Ver componentes da interface</Link>
           {['Acesso e perfil', 'Cliente', 'Administração'].map((area) => (
             <section key={area}>

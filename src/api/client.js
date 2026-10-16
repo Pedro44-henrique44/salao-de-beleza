@@ -44,7 +44,7 @@ export async function api(caminho, { method = 'GET', body, token } = {}) {
   }
 
   if (!resposta.ok) {
-    // A sessão tratará 401 e renovação na issue 05; a página decide a navegação em 404.
+    // A sessão trata 401 e renovação; a página decide a navegação em 404.
     throw criarErroApi(resposta.status, dados)
   }
 
