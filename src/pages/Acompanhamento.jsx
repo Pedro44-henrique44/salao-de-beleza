@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useAuth } from '../AuthContext'
-import Botao from '../components/Botao'
+import Botao, { LinkBotao } from '../components/Botao'
 import Cartao from '../components/Cartao'
 import Estado from '../components/Estado'
 import StatusAgendamento from '../components/StatusAgendamento'
+import { ResumoAvaliacao } from '../components/Avaliacao'
 
 const itens = (dados) => Array.isArray(dados) ? dados : (dados?.results || [])
 const valor = (item, ...chaves) => chaves.map((chave) => item?.[chave]).find((item) => item !== undefined && item !== null)
@@ -51,10 +52,10 @@ function CartaoAgendamento({ agendamento, href, acao, exibirCliente = false }) {
 }
 
 export function InicioCliente() {
+  const [agora] = useState(() => Date.now())
   const estado = useLista(`/agendamentos/?data_inicio=${hoje()}`)
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Erro erro={estado.erro} tentar={estado.recarregar} />
-  const agora = Date.now()
   const proximos = itens(estado.dados).filter((a) => !['cancelado', 'concluido'].includes(a.status) && new Date(inicioDe(a)).getTime() >= agora).sort((a, b) => new Date(inicioDe(a)) - new Date(inicioDe(b)))
   const proximo = proximos[0]
   return <section className="pilha"><p className="sobretitulo">Seu momento de cuidado</p><h1>Olá! Vamos cuidar de você?</h1>{proximo ? <><h2>Seu próximo horário</h2><CartaoAgendamento agendamento={proximo} href={`/meus-horarios/${proximo.id}`} /></> : <Cartao><h2>Nenhum horário marcado</h2><p>Escolha um serviço e reserve seu próximo momento no salão.</p><Link className="botao botao--primario" to="/agendar">Agendar horário</Link></Cartao>}<div className="acoes"><Link className="botao botao--secundario" to="/meus-horarios">Ver horários e histórico</Link>{proximo && <Link className="botao botao--primario" to="/agendar">Agendar outro horário</Link>}</div></section>
@@ -62,10 +63,15 @@ export function InicioCliente() {
 
 export function HorariosCliente() {
   const [aba, setAba] = useState('proximos')
-  const estado = useLista(aba === 'proximos' ? `/agendamentos/?data_inicio=${hoje()}` : `/agendamentos/?data_fim=${dataLocal(new Date(Date.now() - 86400000))}&ordering=-inicio`)
+  const [agora] = useState(() => Date.now())
+  
+  const caminho = aba === 'proximos'
+  ? `/agendamentos/?data_inicio=${hoje()}`
+  : '/agendamentos/?ordering=-inicio'
+
+  const estado = useLista(caminho)
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Erro erro={estado.erro} tentar={estado.recarregar} />
-  const agora = Date.now()
   const todos = itens(estado.dados).sort((a, b) => new Date(inicioDe(b)) - new Date(inicioDe(a)))
   const lista = todos.filter((a) => aba === 'proximos' ? !['cancelado', 'concluido'].includes(a.status) && new Date(inicioDe(a)).getTime() >= agora : ['cancelado', 'concluido'].includes(a.status) || new Date(inicioDe(a)).getTime() < agora)
   return <section className="pilha"><p className="sobretitulo">Acompanhamento</p><h1>Meus horários</h1><div className="acoes"><Botao variante={aba === 'proximos' ? 'primario' : 'secundario'} onClick={() => setAba('proximos')}>Próximos horários</Botao><Botao variante={aba === 'historico' ? 'primario' : 'secundario'} onClick={() => setAba('historico')}>Histórico</Botao></div>{lista.length ? <div className="grade-componentes">{lista.map((a) => <CartaoAgendamento key={a.id} agendamento={a} href={`/meus-horarios/${a.id}`} />)}</div> : <Estado titulo={aba === 'proximos' ? 'Você não tem próximos horários' : 'Seu histórico está vazio'}>{aba === 'proximos' && <Link to="/agendar">Agendar um horário</Link>}</Estado>}</section>
@@ -80,18 +86,13 @@ function useAgendamento(id) {
 }
 
 export function DetalheCliente() {
-  const { id } = useParams(); 
-  const estado = useAgendamento(id); 
-  const { api } = useAuth(); 
-  const [confirma, setConfirma] = useState(false); 
-  const [enviando, setEnviando] = useState(false); 
-  const [erro, setErro] = useState(null); 
-  const [mensagem, setMensagem] = useState('')
+  const { id } = useParams(); const estado = useAgendamento(id); const { api } = useAuth(); const [confirma, setConfirma] = useState(false); const [enviando, setEnviando] = useState(false); const [erro, setErro] = useState(null); const [mensagem, setMensagem] = useState('')
+  const [agora] = useState(() => Date.now())
   async function cancelar() { setEnviando(true); setErro(null); try { await api(`/agendamentos/${id}/cancelar/`, { method: 'POST' }); setMensagem('Agendamento cancelado.'); setConfirma(false); estado.recarregar() } catch (falha) { setErro(falha) } finally { setEnviando(false) } }
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Erro erro={estado.erro} tentar={estado.recarregar} />
-  const a = estado.dados; const podeCancelar = ['solicitado', 'confirmado'].includes(a.status) && new Date(inicioDe(a)).getTime() > Date.now()
-  return <section className="pagina-formulario pilha"><p className="sobretitulo">Meus horários</p><h1>Detalhes do agendamento</h1><Cartao><StatusAgendamento status={a.status} /><dl className="resumo-agendamento"><div><dt>Serviço</dt><dd>{servicoDe(a)}</dd></div><div><dt>Profissional</dt><dd>{profissionalDe(a)}</dd></div><div><dt>Quando</dt><dd>{dataHora(inicioDe(a))}</dd></div><div><dt>Duração</dt><dd>{valor(a.servico, 'duracao', 'duracao_minutos') ? `${valor(a.servico, 'duracao', 'duracao_minutos')} min` : 'Não informada'}</dd></div><div><dt>Observações</dt><dd>{a.observacoes || 'Nenhuma'}</dd></div></dl>{mensagem && <p className="mensagem" role="status">{mensagem}</p>}{erro && <p className="campo-erro" role="alert">{erro.message}</p>}{confirma ? <div className="acoes"><Botao variante="perigo" carregando={enviando} onClick={cancelar}>Confirmar cancelamento</Botao><Botao variante="secundario" disabled={enviando} onClick={() => setConfirma(false)}>Manter agendamento</Botao></div> : podeCancelar && <Botao variante="perigo" onClick={() => setConfirma(true)}>Cancelar agendamento</Botao>}</Cartao><Link to="/meus-horarios">Voltar aos meus horários</Link></section>
+  const a = estado.dados; const podeCancelar = ['solicitado', 'confirmado'].includes(a.status) && new Date(inicioDe(a)).getTime() > agora
+  return <section className="pagina-formulario pilha"><p className="sobretitulo">Meus horários</p><h1>Detalhes do agendamento</h1><Cartao><StatusAgendamento status={a.status} /><dl className="resumo-agendamento"><div><dt>Serviço</dt><dd>{servicoDe(a)}</dd></div><div><dt>Profissional</dt><dd>{profissionalDe(a)}</dd></div><div><dt>Quando</dt><dd>{dataHora(inicioDe(a))}</dd></div><div><dt>Duração</dt><dd>{valor(a.servico, 'duracao', 'duracao_minutos') ? `${valor(a.servico, 'duracao', 'duracao_minutos')} min` : 'Não informada'}</dd></div><div><dt>Observações</dt><dd>{a.observacoes || 'Nenhuma'}</dd></div></dl>{a.nota && <><h2>Sua avaliação</h2><ResumoAvaliacao avaliacao={{ nota: a.nota, comentario: a.comentario }} /></>}{mensagem && <p className="mensagem" role="status">{mensagem}</p>}{erro && <p className="campo-erro" role="alert">{erro.message}</p>}{confirma ? <div className="acoes"><Botao variante="perigo" carregando={enviando} onClick={cancelar}>Confirmar cancelamento</Botao><Botao variante="secundario" disabled={enviando} onClick={() => setConfirma(false)}>Manter agendamento</Botao></div> : podeCancelar && <Botao variante="perigo" onClick={() => setConfirma(true)}>Cancelar agendamento</Botao>}{a.status === 'concluido' && !a.nota && <LinkBotao to={`/meus-horarios/${id}/avaliar`}>Avaliar atendimento</LinkBotao>}</Cartao><Link to="/meus-horarios">Voltar aos meus horários</Link></section>
 }
 
 export function AgendaAdministrador() {
@@ -101,7 +102,6 @@ export function AgendaAdministrador() {
   const [recurso, setRecurso] = useState(params.get('recurso') || ''); 
   const estado = useLista(`/agendamentos/?data_inicio=${data}&data_fim=${data}${recurso ? `&recurso=${recurso}` : ''}`); 
   const profissionais = useLista('/recursos/?ativo=true'); 
-  const navigate = useNavigate()
   const filtrados = useMemo(() => itens(estado.dados).filter((a) => (!status || a.status === status) && (!recurso || String(valor(a.recurso, 'id') || a.recurso_id) === recurso)).sort((a, b) => new Date(inicioDe(a)) - new Date(inicioDe(b))), [estado.dados, status, recurso])
   function filtrar() { setParams({ ...(data ? { data } : {}), ...(status ? { status } : {}), ...(recurso ? { recurso } : {}) }) }
   if (estado.carregando || profissionais.carregando) return <Estado tipo="carregando" />
@@ -110,9 +110,7 @@ export function AgendaAdministrador() {
 }
 
 export function PedidosAdministrador() {
-  const estado = useLista('/agendamentos/?status=solicitado'); 
-  const { api } = useAuth(); const [erro, setErro] = useState(null); 
-  const [ocupado, setOcupado] = useState(null)
+  const estado = useLista('/agendamentos/?status=solicitado'); const { api } = useAuth(); const [erro, setErro] = useState(null); const [ocupado, setOcupado] = useState(null)
   async function atualizar(a, acao) { setErro(null); setOcupado(a.id); try { await api(`/agendamentos/${a.id}/${acao}/`, { method: 'POST' }); estado.recarregar() } catch (falha) { setErro(falha) } finally { setOcupado(null) } }
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Erro erro={estado.erro} tentar={estado.recarregar} />
@@ -121,15 +119,10 @@ export function PedidosAdministrador() {
 }
 
 export function DetalheAdministrador() {
-  const { id } = useParams(); 
-  const estado = useAgendamento(id); 
-  const { api } = useAuth(); 
-  const navigate = useNavigate();
-  const [erro, setErro] = useState(null); 
-  const [ocupado, setOcupado] = useState(false)
+  const { id } = useParams(); const estado = useAgendamento(id); const { api } = useAuth(); const navigate = useNavigate(); const [erro, setErro] = useState(null); const [ocupado, setOcupado] = useState(false)
   async function atualizar(acao) { setErro(null); setOcupado(true); try { await api(`/agendamentos/${id}/${acao}/`, { method: 'POST' }); estado.recarregar() } catch (falha) { setErro(falha) } finally { setOcupado(false) } }
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Erro erro={estado.erro} tentar={estado.recarregar} />
   const a = estado.dados
-  return <section className="pagina-formulario pilha"><p className="sobretitulo">Administração</p><h1>Detalhes do atendimento</h1><Cartao><StatusAgendamento status={a.status} /><dl className="resumo-agendamento"><div><dt>Cliente</dt><dd>{valor(a.cliente, 'nome') || valor(a.usuario, 'nome') || a.cliente_nome || 'Cliente'}</dd></div><div><dt>Serviço</dt><dd>{servicoDe(a)}</dd></div><div><dt>Profissional</dt><dd>{profissionalDe(a)}</dd></div><div><dt>Quando</dt><dd>{dataHora(inicioDe(a))}</dd></div><div><dt>Observações</dt><dd>{a.observacoes || 'Nenhuma'}</dd></div></dl>{erro && <p className="campo-erro" role="alert">{erro.message}</p>}<div className="acoes">{a.status === 'solicitado' && <><Botao disabled={ocupado} onClick={() => atualizar('confirmar')}>Confirmar pedido</Botao><Botao variante="perigo" disabled={ocupado} onClick={() => atualizar('cancelar')}>Cancelar pedido</Botao></>}{a.status === 'confirmado' && <><Botao disabled={ocupado} onClick={() => atualizar('concluir')}>Concluir atendimento</Botao><Botao variante="perigo" disabled={ocupado} onClick={() => atualizar('cancelar')}>Cancelar agendamento</Botao></>}</div></Cartao><Botao variante="secundario" onClick={() => navigate(-1)}>Voltar</Botao></section>
+  return <section className="pagina-formulario pilha"><p className="sobretitulo">Administração</p><h1>Detalhes do atendimento</h1><Cartao><StatusAgendamento status={a.status} /><dl className="resumo-agendamento"><div><dt>Cliente</dt><dd>{valor(a.cliente, 'nome') || valor(a.usuario, 'nome') || a.cliente_nome || 'Cliente'}</dd></div><div><dt>Serviço</dt><dd>{servicoDe(a)}</dd></div><div><dt>Profissional</dt><dd>{profissionalDe(a)}</dd></div><div><dt>Quando</dt><dd>{dataHora(inicioDe(a))}</dd></div><div><dt>Observações</dt><dd>{a.observacoes || 'Nenhuma'}</dd></div></dl>{a.nota && <><h2>Avaliação</h2><ResumoAvaliacao avaliacao={{ nota: a.nota, comentario: a.comentario }} /></>}{erro && <p className="campo-erro" role="alert">{erro.message}</p>}<div className="acoes">{a.status === 'solicitado' && <><Botao disabled={ocupado} onClick={() => atualizar('confirmar')}>Confirmar pedido</Botao><Botao variante="perigo" disabled={ocupado} onClick={() => atualizar('cancelar')}>Cancelar pedido</Botao></>}{a.status === 'confirmado' && <><Botao disabled={ocupado} onClick={() => atualizar('concluir')}>Concluir atendimento</Botao><Botao variante="perigo" disabled={ocupado} onClick={() => atualizar('cancelar')}>Cancelar agendamento</Botao></>}</div></Cartao><Botao variante="secundario" onClick={() => navigate(-1)}>Voltar</Botao></section>
 }
