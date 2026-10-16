@@ -76,7 +76,16 @@ main { width: 100%; max-width: 1160px; margin-inline: auto; padding: 3.5rem 1.25
 .cartao .acoes + p { margin-top: 1rem; }
 .campo { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
 .campo label { font-size: 0.9rem; font-weight: 600; }
-.campo input { width: 100%; min-height: 46px; padding: 0.7rem 0.85rem; border: 1px solid var(--cor-texto-suave); border-radius: 6px; background: var(--cor-superficie); color: var(--cor-texto); }
+.campo input, .campo select, .campo textarea { width: 100%; min-height: 46px; padding: 0.7rem 0.85rem; border: 1px solid var(--cor-texto-suave); border-radius: 6px; background: var(--cor-superficie); color: var(--cor-texto); }
+.campo textarea { resize: vertical; }
+.campo select[aria-invalid='true'], .campo textarea[aria-invalid='true'] { border-color: var(--cor-erro); }
+.admin-titulo { justify-content: space-between; }
+.admin-titulo h1 { margin-bottom: 0; }
+.imagem-cadastro { display: block; width: 160px; height: 160px; object-fit: contain; border-radius: var(--raio); margin-bottom: 1rem; }
+.opcao { display: flex; align-items: center; gap: 0.75rem; overflow-wrap: anywhere; }
+.opcao input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--cor-destaque); }
+.selecao-profissionais { min-width: 0; border: 1px solid var(--cor-borda); border-radius: 6px; padding: 1rem; }
+.somente-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .campo input:disabled { background: var(--cor-suave); cursor: not-allowed; }
 .campo input[aria-invalid='true'] { border-color: var(--cor-erro); }
 .campo-erro { color: var(--cor-erro); }

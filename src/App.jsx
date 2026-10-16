@@ -10,6 +10,9 @@ import Acesso from './pages/Acesso'
 import EsqueciMinhaSenha from './pages/EsqueciMinhaSenha'
 import Perfil from './pages/Perfil'
 import AlterarSenha from './pages/AlterarSenha'
+import ListaCadastros from './pages/admin/ListaCadastros'
+import FormularioCadastro from './pages/admin/FormularioCadastro'
+import Horarios from './pages/admin/Horarios'
 
 export default function App() {
   return (
@@ -32,7 +35,15 @@ export default function App() {
           ))}
           <Route element={<ProtecaoRota permissao="api.change_organizacao" />}>
             <Route path="/admin" element={<Navigate to="/admin/agenda" replace />} />
-            {rotas.filter((rota) => rota.area === 'Administração').map((rota) => (
+            <Route path="/admin/negocio" element={<FormularioCadastro key="negocio" tipo="negocio" />} />
+            <Route path="/admin/profissionais" element={<ListaCadastros key="profissionais" />} />
+            <Route path="/admin/profissionais/nova" element={<FormularioCadastro key="nova-profissional" tipo="recurso" />} />
+            <Route path="/admin/profissionais/:id/editar" element={<FormularioCadastro key="editar-profissional" tipo="recurso" />} />
+            <Route path="/admin/profissionais/:id/horarios" element={<Horarios />} />
+            <Route path="/admin/servicos" element={<ListaCadastros key="servicos" servicos />} />
+            <Route path="/admin/servicos/novo" element={<FormularioCadastro key="novo-servico" tipo="servico" />} />
+            <Route path="/admin/servicos/:id/editar" element={<FormularioCadastro key="editar-servico" tipo="servico" />} />
+            {rotas.filter((rota) => rota.area === 'Administração' && ['A1', 'A2', 'A3', 'A10'].includes(rota.id)).map((rota) => (
               <Route key={rota.caminho} path={rota.caminho} element={<PaginaEmConstrucao titulo={rota.titulo} />} />
             ))}
           </Route>
