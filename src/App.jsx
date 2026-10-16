@@ -15,7 +15,6 @@ import NaoEncontrada from './pages/NaoEncontrada'
 import Perfil from './pages/Perfil'
 import { ListaProfissionais, PerfilProfissional } from './pages/Profissionais'
 import {AgendaAdministrador, DetalheAdministrador, DetalheCliente, HorariosCliente, InicioCliente, PedidosAdministrador,} from './pages/acompanhamento/index.jsx'
-import { rotas } from './rotas'
 
 export default function App() {
   return (
