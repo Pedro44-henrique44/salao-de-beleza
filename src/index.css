@@ -115,6 +115,16 @@ main { width: 100%; max-width: 1160px; margin-inline: auto; padding: 3.5rem 1.25
 .pagina-mensagem > p:not(.sobretitulo) { color: var(--cor-texto-suave); margin-bottom: 2rem; }
 .mapa-rotas { margin-top: 2.5rem; padding: 1.25rem; border: 1px solid var(--cor-borda); border-radius: var(--raio); font-size: 0.9rem; }
 .mapa-rotas h2 { margin-top: 1.5rem; }
+.pagina-agendamento { max-width: 1000px; margin-inline: auto; }
+.grade-agendamento, .grade-horarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 1.25rem; margin-top: 2rem; }
+.cartao-servico, .cartao-escolha { display: flex; flex-direction: column; gap: .5rem; }
+.cartao-servico .botao, .cartao-escolha .botao, .grade-horarios .botao { align-self: flex-start; margin-top: auto; }
+.campo-data { max-width: 280px; margin-top: 2rem; }
+.navegacao-etapa { margin-top: 1.5rem; }
+.resumo-agendamento { display: grid; gap: 1rem; margin: 0 0 2rem; }
+.resumo-agendamento div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--cor-borda); padding-bottom: .65rem; }
+.resumo-agendamento dt { color: var(--cor-texto-suave); }
+.resumo-agendamento dd { margin: 0; text-align: right; font-weight: 600; }
 summary { cursor: pointer; font-weight: 600; }
 li { margin-block: 0.4rem; }
 .pular-conteudo { position: absolute; left: 1rem; top: -100px; z-index: 10; }
