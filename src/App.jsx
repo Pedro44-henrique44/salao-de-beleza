@@ -13,6 +13,7 @@ import AlterarSenha from './pages/AlterarSenha'
 import ListaCadastros from './pages/admin/ListaCadastros'
 import FormularioCadastro from './pages/admin/FormularioCadastro'
 import Horarios from './pages/admin/Horarios'
+import Agendamento from './pages/Agendamento'
 
 export default function App() {
   return (
@@ -30,7 +31,7 @@ export default function App() {
           <Route path="/perfil/alterar-senha" element={<AlterarSenha />} />
           {rotas.filter((rota) => rota.area === 'Cliente').map((rota) => (
             <Route key={rota.caminho} element={<ProtecaoRota permissao={rota.permissao} />}>
-              <Route path={rota.caminho} element={<PaginaEmConstrucao titulo={rota.titulo} />} />
+              <Route path={rota.caminho} element={['C2', 'C3', 'C4', 'C5', 'C6'].includes(rota.id) ? <Agendamento /> : <PaginaEmConstrucao titulo={rota.titulo} />} />
             </Route>
           ))}
           <Route element={<ProtecaoRota permissao="api.change_organizacao" />}>
