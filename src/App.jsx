@@ -14,6 +14,7 @@ import ListaCadastros from './pages/admin/ListaCadastros'
 import FormularioCadastro from './pages/admin/FormularioCadastro'
 import Horarios from './pages/admin/Horarios'
 import Agendamento from './pages/Agendamento'
+import { AgendaAdministrador, DetalheAdministrador, DetalheCliente, HorariosCliente, InicioCliente, PedidosAdministrador } from './pages/Acompanhamento'
 
 export default function App() {
   return (
@@ -31,7 +32,7 @@ export default function App() {
           <Route path="/perfil/alterar-senha" element={<AlterarSenha />} />
           {rotas.filter((rota) => rota.area === 'Cliente').map((rota) => (
             <Route key={rota.caminho} element={<ProtecaoRota permissao={rota.permissao} />}>
-              <Route path={rota.caminho} element={['C2', 'C3', 'C4', 'C5', 'C6'].includes(rota.id) ? <Agendamento /> : <PaginaEmConstrucao titulo={rota.titulo} />} />
+              <Route path={rota.caminho} element={['C2', 'C3', 'C4', 'C5', 'C6'].includes(rota.id) ? <Agendamento /> : rota.id === 'C1' ? <InicioCliente /> : rota.id === 'C7' ? <HorariosCliente /> : rota.id === 'C8' ? <DetalheCliente /> : <PaginaEmConstrucao titulo={rota.titulo} />} />
             </Route>
           ))}
           <Route element={<ProtecaoRota permissao="api.change_organizacao" />}>
@@ -45,7 +46,7 @@ export default function App() {
             <Route path="/admin/servicos/novo" element={<FormularioCadastro key="novo-servico" tipo="servico" />} />
             <Route path="/admin/servicos/:id/editar" element={<FormularioCadastro key="editar-servico" tipo="servico" />} />
             {rotas.filter((rota) => rota.area === 'Administração' && ['A1', 'A2', 'A3', 'A10'].includes(rota.id)).map((rota) => (
-              <Route key={rota.caminho} path={rota.caminho} element={<PaginaEmConstrucao titulo={rota.titulo} />} />
+              <Route key={rota.caminho} path={rota.caminho} element={rota.id === 'A1' ? <AgendaAdministrador /> : rota.id === 'A2' ? <PedidosAdministrador /> : rota.id === 'A3' ? <DetalheAdministrador /> : <PaginaEmConstrucao titulo={rota.titulo} />} />
             ))}
           </Route>
         </Route>
