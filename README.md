@@ -4,9 +4,10 @@ Aplicativo web da disciplina POS 2026, desenvolvido em React e JavaScript com Vi
 O objetivo é permitir agendamentos de cabelo, manicure e maquiagem e a administração
 dos profissionais, serviços, horários e agenda do salão.
 
-**Estado atual:** itens 01 a 03 da árvore de progresso, com estrutura de pastas,
-rotas provisórias, identidade visual, componentes comuns e cliente HTTP com erros padronizados.
-Login, cadastros e agendamentos ainda não estão implementados.
+**Estado atual:** etapas 1 e 2 da árvore de progresso (itens 01 a 08), com fundação,
+identidade visual, cliente HTTP, cadastro/login, sessão persistente, permissões,
+recuperação de senha e edição do perfil. Os cadastros administrativos e os
+agendamentos continuam com páginas provisórias.
 
 ## Executar localmente
 
@@ -43,10 +44,13 @@ O build é gerado em `dist/`. A configuração de rotas do Vercel está em
 - `src/rotas.js`: caminhos das telas e seus códigos na especificação.
 - `src/App.jsx`: associação entre rotas e componentes.
 - `src/main.jsx`: inicialização do React e do BrowserRouter.
+- `src/AuthContext.js` e `src/AuthProvider.jsx`: usuário conectado e ações da sessão.
+- `src/api/sessao.js`: tokens, renovação e requisições autenticadas.
+- `src/permissoes.js`: consulta das permissões e destino após login.
 
 Os arquivos `.gitkeep` mantêm as pastas vazias no Git e podem ser removidos quando
-elas receberem código. As rotas atuais exibem páginas provisórias, sem dados ou
-autenticação. Ao implementar uma tela, substituir sua rota provisória em `App.jsx`
+elas receberem código. As rotas de cliente e administração já exigem autenticação.
+Ao implementar uma tela, substituir sua rota provisória em `App.jsx`
 pelo componente real. Coordenar alterações nos arquivos compartilhados com o colega.
 Ao usar `Campo`, informar um `id` único na página para associar o rótulo ao input.
 
@@ -58,8 +62,8 @@ Ao usar `Campo`, informar um `id` único na página para associar o rótulo ao i
 - [Referência de organização dos arquivos](https://github.com/devigMurilo/consultorio-medico)
 
 A entrega da disciplina está prevista para **16/10/2026**, com demonstração no
-Vercel. Todos os integrantes devem contribuir com commits. As próximas issues
-introduzem acesso/sessão (04–08). Esses números correspondem
+Vercel. Todos os integrantes devem contribuir com commits. A próxima etapa é a
+preparação do salão pelo administrador (itens 09–12). Esses números correspondem
 aos itens da árvore de progresso, não aos números automáticos do GitHub.
 
 ## Comunicação com a API
@@ -87,6 +91,35 @@ o JSON original. Erros gerais de validação vêm de `detail`, `non_field_errors
 listas. Há mensagens para 400, 401, 403, 404, 429, falhas do servidor e de conexão
 (`status: 0` em falhas de conexão).
 
-O token é opcional e fornecido por requisição. Login, armazenamento e renovação
-automática ainda serão integrados nos itens 04–05; por enquanto, 401 é propagado.
-O retorno à lista em 404 será responsabilidade de cada página.
+O cliente acima é usado diretamente para endpoints públicos. Nas páginas que
+exigem login, usar `api` do contexto para incluir o token e renovar a sessão:
+
+```jsx
+const { usuario, api, pode } = useAuth() // importar de src/AuthContext.js
+const pagina = await api('/servicos/?ativo=true&page=1')
+const podeAgendar = pode('api.add_agendamento')
+```
+
+O retorno à lista em 404 continua sendo responsabilidade de cada página.
+
+## Acesso e sessão
+
+Cadastro, login e recuperação enviam o slug fixo `salao-de-beleza`. Após o cadastro,
+o app entra automaticamente; o login consulta `/auth/eu/` antes de abrir a área
+interna. O perfil permite editar nome, enviar/remover foto e alterar a senha.
+E-mail é somente leitura. O link de recuperação abre a página da própria API.
+
+Os tokens ficam no `localStorage` na chave `salao-de-beleza:sessao`; senhas não são
+armazenadas. Ao recarregar, o app consulta o perfil novamente. Em um 401, renova o
+access e repete a requisição uma vez. Chamadas simultâneas compartilham a renovação.
+Se a renovação falhar, ou a repetição retornar 401, limpa a sessão e pede login.
+Sair limpa os tokens e volta à entrada. Uma resposta atrasada não reabre a sessão.
+
+A navegação administrativa exige `api.change_organizacao`; Agendar exige
+`api.add_agendamento`, e a rota de avaliação exige `api.avaliar_agendamento`.
+A API continua responsável por autorizar cada ação. Os nomes dos grupos não são
+usados para decidir acesso.
+
+Para o Vercel, cadastrar `VITE_API_URL` com o valor de `.env.example` e gerar um
+novo deploy. O `.env` local não é versionado e contém apenas o endereço público
+da API. Não colocar senhas ou tokens nas variáveis `VITE_`.

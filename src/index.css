@@ -92,6 +92,15 @@ main { width: 100%; max-width: 1160px; margin-inline: auto; padding: 3.5rem 1.25
 .status--concluido { background: #e6ebf4; color: #354d79; }
 .status--cancelado { background: #f8e5e7; color: #8c2937; }
 .pilha { display: grid; gap: 1.5rem; }
+.pagina-formulario { max-width: 560px; margin-inline: auto; }
+.pagina-formulario h1 { font-size: clamp(2rem, 5vw, 3rem); }
+.pagina-formulario .estado { min-height: auto; padding: 1rem; }
+.mensagem { padding: 1rem; margin: 0; background: var(--cor-suave); border-radius: 6px; }
+.link-formulario { margin-top: 1.5rem; }
+.menu-sessao { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; padding: 0.75rem max(1.25rem, calc((100% - 1120px) / 2)); border-bottom: 1px solid var(--cor-borda); background: var(--cor-superficie); }
+.perfil-foto { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; }
+.perfil-foto img, .perfil-sem-foto { width: 112px; height: 112px; border-radius: 50%; object-fit: cover; }
+.perfil-sem-foto { display: grid; place-items: center; background: var(--cor-suave); color: var(--cor-texto-suave); }
 .grade-componentes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1.5rem; }
 .pagina-mensagem { max-width: 650px; padding-block: 3rem; }
 .pagina-mensagem > p:not(.sobretitulo) { color: var(--cor-texto-suave); margin-bottom: 2rem; }
