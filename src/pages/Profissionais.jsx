@@ -87,11 +87,7 @@ export function PerfilProfissional() {
               ? `${media.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} de 5 · ${avaliacoes.dados.length} avaliação(ões)`
               : 'Ainda sem avaliações'}
           </p>
-          <Link
-            className="botao botao--primario"
-            to="/agendar"
-            state={{ profissional }}
-          >
+          <Link className="botao botao--primario" to="/agendar" state={{ profissional }}>
             Agendar com esta profissional
           </Link>
         </div>
