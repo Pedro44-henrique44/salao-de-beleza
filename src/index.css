@@ -122,6 +122,27 @@ main { width: 100%; max-width: 1160px; margin-inline: auto; padding: 3.5rem 1.25
 .cartao-agendamento > .acoes:first-child { justify-content: space-between; }
 .filtros-agenda { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); align-items: end; gap: 1rem; }
 .filtros-agenda > .botao { justify-self: start; }
+.cartao-profissional { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; }
+.cartao-profissional h2, .cartao-profissional p { margin: 0; }
+.foto-profissional { width: 100%; max-width: 220px; aspect-ratio: 1; object-fit: cover; border-radius: var(--raio); background: var(--cor-suave); }
+.foto-profissional--perfil { width: min(100%, 260px); }
+.perfil-profissional { display: grid; grid-template-columns: minmax(0, 260px) 1fr; align-items: center; gap: 2rem; }
+.lista-servicos { padding-left: 1.25rem; }
+.lista-servicos li { margin-block: .6rem; }
+.cartao-avaliacao { display: grid; gap: .75rem; }
+.cartao-avaliacao p { margin: 0; }
+.avaliacao-cabecalho { display: flex; align-items: center; gap: .75rem; }
+.avaliacao-estrelas { color: #a86412; letter-spacing: .12em; font-size: 1.2rem; white-space: nowrap; }
+.campo-nota { border: 0; padding: 0; }
+.campo-nota legend { margin-bottom: .5rem; font-size: .9rem; font-weight: 600; }
+.opcoes-nota { display: flex; gap: .35rem; }
+.opcoes-nota label { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid var(--cor-borda); border-radius: 6px; color: var(--cor-texto-suave); cursor: pointer; }
+.opcoes-nota label span[aria-hidden='true'] { font-size: 1.6rem; }
+.opcoes-nota label:has(input:checked), .opcoes-nota label:hover { color: #a86412; background: var(--cor-suave); }
+.opcoes-nota input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opcoes-nota label:has(input:focus-visible) { outline: 3px solid var(--cor-destaque); outline-offset: 3px; }
+.resumo-avaliacao { margin-block: 1rem; }
+.resumo-avaliacao p { margin: .5rem 0 0; }
 .cartao-servico, .cartao-escolha { display: flex; flex-direction: column; gap: .5rem; }
 .cartao-servico .botao, .cartao-escolha .botao, .grade-horarios .botao { align-self: flex-start; margin-top: auto; }
 .campo-data { max-width: 280px; margin-top: 2rem; }
@@ -144,6 +165,8 @@ li { margin-block: 0.4rem; }
   .especialidade, .especialidade:first-child { padding: 1.5rem 0; }
   .especialidade + .especialidade { border-left: 0; border-top: 1px solid var(--cor-borda); }
   .rodape { flex-wrap: wrap; gap: 0.5rem; }
+  .perfil-profissional { grid-template-columns: 1fr; }
+  .foto-profissional--perfil { max-width: 220px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .indicador-carregamento { animation: none; }

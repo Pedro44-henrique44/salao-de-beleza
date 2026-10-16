@@ -1,20 +1,57 @@
 import { Navigate, Route, Routes } from 'react-router'
 import Layout from './components/Layout'
+import ProtecaoRota from './components/ProtecaoRota'
+import FormularioCadastro from './pages/admin/FormularioCadastro'
+import Horarios from './pages/admin/Horarios'
+import ListaCadastros from './pages/admin/ListaCadastros'
+import Acesso from './pages/Acesso'
+import Agendamento from './pages/Agendamento'
+import AlterarSenha from './pages/AlterarSenha'
+import { AvaliarAtendimento, ListaAvaliacoesAdministrador } from './pages/Avaliacoes'
+import Componentes from './pages/Componentes'
+import EsqueciMinhaSenha from './pages/EsqueciMinhaSenha'
 import Entrada from './pages/Entrada'
 import NaoEncontrada from './pages/NaoEncontrada'
 import PaginaEmConstrucao from './pages/PaginaEmConstrucao'
-import { rotas } from './rotas'
-import Componentes from './pages/Componentes'
-import ProtecaoRota from './components/ProtecaoRota'
-import Acesso from './pages/Acesso'
-import EsqueciMinhaSenha from './pages/EsqueciMinhaSenha'
 import Perfil from './pages/Perfil'
-import AlterarSenha from './pages/AlterarSenha'
-import ListaCadastros from './pages/admin/ListaCadastros'
-import FormularioCadastro from './pages/admin/FormularioCadastro'
-import Horarios from './pages/admin/Horarios'
-import Agendamento from './pages/Agendamento'
-import { AgendaAdministrador, DetalheAdministrador, DetalheCliente, HorariosCliente, InicioCliente, PedidosAdministrador } from './pages/Acompanhamento'
+import { ListaProfissionais, PerfilProfissional } from './pages/Profissionais'
+import {
+  AgendaAdministrador,
+  DetalheAdministrador,
+  DetalheCliente,
+  HorariosCliente,
+  InicioCliente,
+  PedidosAdministrador,
+} from './pages/Acompanhamento'
+import { rotas } from './rotas'
+
+const paginasCliente = {
+  C1: <InicioCliente />,
+  C7: <HorariosCliente />,
+  C8: <DetalheCliente />,
+  C9: <AvaliarAtendimento />,
+  C10: <ListaProfissionais />,
+  C11: <PerfilProfissional />,
+}
+
+const paginasAdministrador = {
+  A1: <AgendaAdministrador />,
+  A2: <PedidosAdministrador />,
+  A3: <DetalheAdministrador />,
+  A10: <ListaAvaliacoesAdministrador />,
+}
+
+function paginaDoCliente(rota) {
+  if (['C2', 'C3', 'C4', 'C5', 'C6'].includes(rota.id)) {
+    return <Agendamento />
+  }
+
+  return paginasCliente[rota.id] || <PaginaEmConstrucao titulo={rota.titulo} />
+}
+
+function paginaDoAdministrador(rota) {
+  return paginasAdministrador[rota.id] || <PaginaEmConstrucao titulo={rota.titulo} />
+}
 
 export default function App() {
   return (
@@ -30,11 +67,13 @@ export default function App() {
         <Route element={<ProtecaoRota />}>
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/perfil/alterar-senha" element={<AlterarSenha />} />
-          {rotas.filter((rota) => rota.area === 'Cliente').map((rota) => (
-            <Route key={rota.caminho} element={<ProtecaoRota permissao={rota.permissao} />}>
-              <Route path={rota.caminho} element={['C2', 'C3', 'C4', 'C5', 'C6'].includes(rota.id) ? <Agendamento /> : rota.id === 'C1' ? <InicioCliente /> : rota.id === 'C7' ? <HorariosCliente /> : rota.id === 'C8' ? <DetalheCliente /> : <PaginaEmConstrucao titulo={rota.titulo} />} />
-            </Route>
-          ))}
+          {rotas
+            .filter((rota) => rota.area === 'Cliente')
+            .map((rota) => (
+              <Route key={rota.caminho} element={<ProtecaoRota permissao={rota.permissao} />}>
+                <Route path={rota.caminho} element={paginaDoCliente(rota)} />
+              </Route>
+            ))}
           <Route element={<ProtecaoRota permissao="api.change_organizacao" />}>
             <Route path="/admin" element={<Navigate to="/admin/agenda" replace />} />
             <Route path="/admin/negocio" element={<FormularioCadastro key="negocio" tipo="negocio" />} />
@@ -45,9 +84,11 @@ export default function App() {
             <Route path="/admin/servicos" element={<ListaCadastros key="servicos" servicos />} />
             <Route path="/admin/servicos/novo" element={<FormularioCadastro key="novo-servico" tipo="servico" />} />
             <Route path="/admin/servicos/:id/editar" element={<FormularioCadastro key="editar-servico" tipo="servico" />} />
-            {rotas.filter((rota) => rota.area === 'Administração' && ['A1', 'A2', 'A3', 'A10'].includes(rota.id)).map((rota) => (
-              <Route key={rota.caminho} path={rota.caminho} element={rota.id === 'A1' ? <AgendaAdministrador /> : rota.id === 'A2' ? <PedidosAdministrador /> : rota.id === 'A3' ? <DetalheAdministrador /> : <PaginaEmConstrucao titulo={rota.titulo} />} />
-            ))}
+            {rotas
+              .filter((rota) => rota.area === 'Administração' && ['A1', 'A2', 'A3', 'A10'].includes(rota.id))
+              .map((rota) => (
+                <Route key={rota.caminho} path={rota.caminho} element={paginaDoAdministrador(rota)} />
+              ))}
           </Route>
         </Route>
         <Route path="*" element={<NaoEncontrada />} />

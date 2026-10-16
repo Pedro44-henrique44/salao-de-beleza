@@ -31,11 +31,17 @@ export default function Agendamento() {
   const { api } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [selecao, setSelecao] = useState(() => JSON.parse(sessionStorage.getItem(CHAVE) || '{}'))
+  const [selecao, setSelecao] = useState(() => {
+    const anterior = JSON.parse(sessionStorage.getItem(CHAVE) || '{}')
+    const profissional = location.state?.profissional
+    return profissional
+      ? { ...anterior, profissional, servico: null, horario: null }
+      : anterior
+  })
   const salvar = (dados) => { setSelecao(dados); sessionStorage.setItem(CHAVE, JSON.stringify(dados)) }
   const caminho = location.pathname
 
-  if (caminho === '/agendar') return <EscolherServico api={api} navigate={navigate} salvar={salvar} />
+  if (caminho === '/agendar') return <EscolherServico api={api} navigate={navigate} selecao={selecao} salvar={salvar} />
   if (caminho === '/agendar/profissional') return <EscolherProfissional api={api} navigate={navigate} selecao={selecao} salvar={salvar} />
   if (caminho === '/agendar/horario') return <EscolherHorario api={api} navigate={navigate} selecao={selecao} salvar={salvar} />
   if (caminho === '/agendar/confirmar') return <Confirmar api={api} navigate={navigate} selecao={selecao} salvar={salvar} />
@@ -44,12 +50,12 @@ export default function Agendamento() {
 
 function Falha({ estado }) { return estado.erro ? <Estado tipo="erro" titulo="Não foi possível carregar" aoTentarNovamente={() => window.location.reload()}>{estado.erro.message}</Estado> : null }
 
-function EscolherServico({ api, navigate, salvar }) {
+function EscolherServico({ api, navigate, selecao, salvar }) {
   const estado = useDados(api, '/servicos/?ativo=true')
   if (estado.carregando) return <Estado tipo="carregando" />
   if (estado.erro) return <Falha estado={estado} />
   const servicos = lista(estado.dados)
-  return <section className="pagina-agendamento"><Cabecalho titulo="Escolha um serviço" etapa="1" />{servicos.length ? <div className="grade-agendamento">{servicos.map((servico) => <Cartao className="cartao-servico" key={servico.id}><h2>{servico.nome}</h2><p className="texto-suave">{servico.descricao || 'Um cuidado pensado para você.'}</p><p><strong>{minutos(campo(servico, 'duracao', 'duracao_minutos'))}</strong> · <strong>{dinheiro(servico.preco)}</strong></p><Botao onClick={() => { salvar({ servico }); navigate('/agendar/profissional') }}>Escolher</Botao></Cartao>)}</div> : <Estado titulo="Nenhum serviço disponível" />}</section>
+  return <section className="pagina-agendamento"><Cabecalho titulo="Escolha um serviço" etapa="1" />{selecao.profissional && <p className="mensagem">Agendando com {selecao.profissional.nome}</p>}{servicos.length ? <div className="grade-agendamento">{servicos.map((servico) => <Cartao className="cartao-servico" key={servico.id}><h2>{servico.nome}</h2><p className="texto-suave">{servico.descricao || 'Um cuidado pensado para você.'}</p><p><strong>{minutos(campo(servico, 'duracao', 'duracao_minutos'))}</strong> · <strong>{dinheiro(servico.preco)}</strong></p><Botao onClick={() => { salvar({ ...selecao, servico, horario: null }); navigate(selecao.profissional ? '/agendar/horario' : '/agendar/profissional') }}>Escolher</Botao></Cartao>)}</div> : <Estado titulo="Nenhum serviço disponível" />}</section>
 }
 
 function EscolherProfissional({ api, navigate, selecao, salvar }) {
